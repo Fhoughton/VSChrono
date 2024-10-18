@@ -14,8 +14,8 @@
   "contributes": {
     "commands": [
       {
-        "command": "vschrono.helloWorld",
-        "title": "Hello World"
+        "command": "vschrono.display",
+        "title": "Open Time Tracker"
       }
     ]
   },
