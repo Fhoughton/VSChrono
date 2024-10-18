@@ -6,7 +6,7 @@ export function activate(context: vscode.ExtensionContext) {
             'vschronowindow',
             'VSChrono Tracker',
             vscode.ViewColumn.One,
-            {}
+            { enableScripts: true }
         );
 
         // HTML content for the webview
@@ -48,6 +48,30 @@ function getWebviewContent() {
         <button onclick="stopTimer()">Stop</button>
         <button onclick="resetTimer()">Reset</button>
     </body>
+	<script>
+		let timerInterval;
+		let seconds = 0;
+
+		function startTimer() {
+			if (!timerInterval) {
+				timerInterval = setInterval(() => {
+					seconds++;
+					document.getElementById('timer').textContent = new Date(seconds * 1000).toISOString().substr(11, 8);
+				}, 1000);
+			}
+		}
+
+		function stopTimer() {
+			clearInterval(timerInterval);
+			timerInterval = null;
+		}
+
+		function resetTimer() {
+			stopTimer();
+			seconds = 0;
+			document.getElementById('timer').textContent = '00:00:00';
+		}
+	</script>
     </html>`;
 }
 
