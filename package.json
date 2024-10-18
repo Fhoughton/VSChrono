@@ -1,7 +1,7 @@
 {
   "name": "vschrono",
   "displayName": "VSChrono",
-  "description": "An extension to your time whilst coding, such as for keeping hours",
+  "description": "An extension to track your time whilst coding, such as for keeping hours",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.94.0"
