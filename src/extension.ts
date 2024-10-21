@@ -52,13 +52,15 @@ function getWebviewContent() {
 		const vscode = acquireVsCodeApi(); // Acquire VSCode api for handling state
 
 		let timerInterval;
-		let seconds = 0;
+        let startTime = null; // Store the start time as a Date object
+        let elapsedTime = 0; // Store elapsed time when timer is stopped
         let isRunning = false;
 
 		// Restore the state if available as VSCode destroys webviews on tab out
 		const previousState = vscode.getState();
 		if (previousState) {
-			seconds = previousState.seconds || 0;
+			startTime = previousState.startTime ? new Date(previousState.startTime) : null;
+			elapsedTime = previousState.elapsedTime || 0;
 			isRunning = previousState.isRunning || false;
 			updateTimerDisplay();
 
@@ -68,25 +70,34 @@ function getWebviewContent() {
 		}
 
 		function updateTimerDisplay() {
-			document.getElementById('timer').textContent = new Date(seconds * 1000).toISOString().substr(11, 8);
+			const currentTime = new Date();
+            const totalElapsedSeconds = isRunning ? elapsedTime + Math.floor((currentTime - startTime) / 1000) : elapsedTime;
+            document.getElementById('timer').textContent = new Date(totalElapsedSeconds * 1000).toISOString().substr(11, 8);
 		}
 
 		function startTimer(isRestoring = false) {
-			if (!timerInterval) {
-				isRunning = true;
-				timerInterval = setInterval(() => {
-					seconds++;
-					updateTimerDisplay();
-					saveState(); // Save state after each tick
-				}, 1000);
+            if (!timerInterval) {
+                isRunning = true;
 
-				if (!isRestoring) saveState(); // Save when starting normally
-			}
+                if (!isRestoring) {
+                    startTime = new Date(); // Set start time to current time
+                }
+
+                timerInterval = setInterval(() => {
+                    updateTimerDisplay(); // Correctly update the timer display
+                    saveState(); // Save state after each update
+                }, 1000);
+
+                if (!isRestoring) saveState(); // Save when starting normally
+            }
 		}
 
 		function stopTimer() {
 			clearInterval(timerInterval);
 			timerInterval = null;
+
+            // Calculate the elapsed time when stopping the timer
+            elapsedTime += Math.floor((new Date() - startTime) / 1000);
 			isRunning = false;
 			saveState(); // Save the state when the timer is stopped
 		}
@@ -94,7 +105,8 @@ function getWebviewContent() {
 		function resetTimer() {
 			clearInterval(timerInterval);
 			timerInterval = null;
-			seconds = 0;
+			elapsedTime = 0;
+            startTime = null;
 			isRunning = false;
 			updateTimerDisplay();
 			saveState(); // Save the state when the timer is reset
@@ -102,7 +114,8 @@ function getWebviewContent() {
 
 		function saveState() {
 			vscode.setState({
-				seconds: seconds,
+				startTime: startTime ? startTime.toISOString() : null,
+				elapsedTime: elapsedTime,
 				isRunning: isRunning
 			});
 		}
